@@ -11,9 +11,9 @@ class AuthSingleton {
   private static instance: AuthSingleton;
   private users: { [email: string]: { password: string; name: string } } = {};
 
-  // --- Missions Storage ---
   private missions: Mission[] = [];
-  private archivedMissions: Mission[] = []; // NEW: Archived missions storage
+  private completedMissions: Mission[] = [];
+  private archivedMissions: Mission[] = [];
 
   private constructor() {
     // Default users
@@ -25,20 +25,14 @@ class AuthSingleton {
       {
         id: 1,
         name: "Falcon 9 - Starlink 25",
-        date: "2025-09-01",
+        date: "2025-09-25T18:00:00", // ISO format (upcoming)
         description: "Delivering 60 Starlink satellites into orbit."
       },
       {
         id: 2,
         name: "Falcon Heavy - Jupiter Probe",
-        date: "2025-10-10",
+        date: "2025-10-10T14:00:00",
         description: "Launching a deep space probe to Jupiter."
-      },
-      {
-        id: 3,
-        name: "Dragon Cargo - ISS Resupply",
-        date: "2025-08-15",
-        description: "Resupplying the International Space Station with cargo."
       }
     ];
   }
@@ -50,7 +44,7 @@ class AuthSingleton {
     return AuthSingleton.instance;
   }
 
-  // --- User Methods ---
+  // ---------------- USERS ----------------
   public validateUser(email: string, password: string): boolean {
     return this.users[email]?.password === password;
   }
@@ -59,67 +53,52 @@ class AuthSingleton {
     return this.users[email]?.name ?? null;
   }
 
-  public addUser(email: string, password: string, name: string) {
-    this.users[email] = { password, name };
-  }
-
-  public getUsers(): { [email: string]: { password: string; name: string } } {
-    return this.users;
-  }
-
-  // --- Mission Methods ---
+  // ---------------- MISSIONS ----------------
   public getMissions(): Mission[] {
     return this.missions;
   }
 
-  public addMission(name: string, date: string, description: string) {
+  public addMission(name: string, date: string, description: string): Mission {
     const newMission = {
-      id: this.missions.length + this.archivedMissions.length + 1,
+      id: this.missions.length + this.completedMissions.length + this.archivedMissions.length + 1,
       name,
       date,
       description
     };
     this.missions.push(newMission);
+    return newMission;
   }
 
-  public deleteMission(id: number) {
-    this.missions = this.missions.filter((m) => m.id !== id);
+  public completeMission(id: number) {
+    const index = this.missions.findIndex(m => m.id === id);
+    if (index >= 0) {
+      const [done] = this.missions.splice(index, 1);
+      this.completedMissions.push(done);
+    }
   }
 
-  // --- Archived Missions Methods ---
-  public getArchivedMissions(): Mission[] {
-    return this.archivedMissions;
+  public getCompletedMissions(): Mission[] {
+    return this.completedMissions;
   }
 
   public archiveMission(id: number) {
-    const index = this.missions.findIndex(m => m.id === id);
+    const index = this.completedMissions.findIndex(m => m.id === id);
     if (index >= 0) {
-      const [archived] = this.missions.splice(index, 1);
+      const [archived] = this.completedMissions.splice(index, 1);
       this.archivedMissions.push(archived);
     }
   }
 
-  public restoreMission(id: number) {
-    const index = this.archivedMissions.findIndex(m => m.id === id);
-    if (index >= 0) {
-      const [restored] = this.archivedMissions.splice(index, 1);
-      this.missions.push(restored);
-    }
+  public getArchivedMissions(): Mission[] {
+    return this.archivedMissions;
   }
 
-  public deleteArchivedMission(id: number) {
-    this.archivedMissions = this.archivedMissions.filter(m => m.id !== id);
-  }
-
-  // --- JWT Login Method ---
-  private static SECRET = "your_secret_key"; // put in .env in real apps
+  // ---------------- JWT ----------------
+  private static SECRET = "your_secret_key";
 
   public login(email: string, password: string): string | null {
     if (this.validateUser(email, password)) {
-      const token = jwt.sign({ email }, AuthSingleton.SECRET, {
-        expiresIn: "1h"
-      });
-      return token;
+      return jwt.sign({ email }, AuthSingleton.SECRET, { expiresIn: "1h" });
     }
     return null;
   }
