@@ -9,6 +9,7 @@ const auth = AuthSingleton.getInstance();
 
 app.use(cors());
 app.use(bodyParser.json());
+const router = express.Router();
 
 // ---------------- LOGIN ----------------
 app.post("/login", (req, res) => {
@@ -22,6 +23,8 @@ app.post("/login", (req, res) => {
 app.get("/missions", (req, res) => {
   res.json(auth.getMissions());
 });
+
+app.use("/api", router);
 
 app.post("/missions", (req, res) => {
   const { name, date, description } = req.body;
