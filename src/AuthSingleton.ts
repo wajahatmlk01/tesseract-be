@@ -5,6 +5,7 @@ interface Mission {
   name: string;
   date: string;
   description: string;
+  image?: string;
 }
 
 class AuthSingleton {
@@ -58,15 +59,16 @@ class AuthSingleton {
     return this.missions;
   }
 
-  public addMission(name: string, date: string, description: string): Mission {
-    const newMission = {
-      id: this.missions.length + this.completedMissions.length + this.archivedMissions.length + 1,
-      name,
-      date,
-      description
-    };
-    this.missions.push(newMission);
-    return newMission;
+  public addMission(name: string, date: string, description: string, image?: string): Mission {
+  const newMission: Mission = {
+    id: this.missions.length + this.completedMissions.length + this.archivedMissions.length + 1,
+    name,
+    date,
+    description,
+    image: image || ""
+  };
+  this.missions.push(newMission);
+  return newMission;
   }
 
   public completeMission(id: number) {

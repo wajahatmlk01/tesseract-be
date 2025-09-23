@@ -27,8 +27,8 @@ app.get("/missions", (req, res) => {
 app.use("/api", router);
 
 app.post("/missions", (req, res) => {
-  const { name, date, description } = req.body;
-  const mission = auth.addMission(name, date, description);
+  const { name, date, description, image } = req.body;
+  const mission = auth.addMission(name, date, description, image);
   res.json(mission);
 });
 
@@ -43,16 +43,21 @@ app.get("/missions/completed", (req, res) => {
 });
 
 // ---------------- ARCHIVE ----------------
-app.post("/missions/:id/archive", (req, res) => {
-  const { id } = req.params;
-  auth.archiveMission(Number(id));
-  res.json({ message: "Mission archived" });
-});
-
-app.get("/missions/archived", (req, res) => {
+// fetch all archived missions
+app.get("/missions/archive", (req, res) => {
   res.json(auth.getArchivedMissions());
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+// archive (or restore) a mission
+app.put("/missions/:id/archive", (req, res) => {
+  const { id } = req.params;
+  auth.archiveMission(Number(id)); // you’ll need this to toggle archive/restore
+  res.json({ message: "Mission archive status updated" });
+});
+
+// delete mission forever
+app.delete("/missions/:id", (req, res) => {
+  const { id } = req.params;
+  auth.deleteMission(Number(id)); // you’ll need to add this method in AuthSingleton
+  res.json({ message: "Mission deleted permanently" });
 });
