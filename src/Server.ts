@@ -55,9 +55,6 @@ app.put("/missions/:id/archive", (req, res) => {
   res.json({ message: "Mission archive status updated" });
 });
 
-// delete mission forever
-app.delete("/missions/:id", (req, res) => {
-  const { id } = req.params;
-  auth.deleteMission(Number(id)); // you’ll need to add this method in AuthSingleton
-  res.json({ message: "Mission deleted permanently" });
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
