@@ -1,7 +1,9 @@
+// src/server.ts
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import AuthSingleton from "./AuthSingleton";
+import { getPlanets } from "./planetsApi";
 
 const app = express();
 const PORT = 5000;
@@ -9,7 +11,6 @@ const auth = AuthSingleton.getInstance();
 
 app.use(cors());
 app.use(bodyParser.json());
-const router = express.Router();
 
 // ---------------- LOGIN ----------------
 app.post("/login", (req, res) => {
@@ -20,41 +21,25 @@ app.post("/login", (req, res) => {
 });
 
 // ---------------- MISSIONS ----------------
-app.get("/missions", (req, res) => {
-  res.json(auth.getMissions());
-});
-
-app.use("/api", router);
-
+app.get("/missions", (req, res) => res.json(auth.getMissions()));
 app.post("/missions", (req, res) => {
   const { name, date, description, image } = req.body;
-  const mission = auth.addMission(name, date, description, image);
-  res.json(mission);
+  res.json(auth.addMission(name, date, description, image));
 });
-
 app.post("/missions/:id/complete", (req, res) => {
-  const { id } = req.params;
-  auth.completeMission(Number(id));
+  auth.completeMission(Number(req.params.id));
   res.json({ message: "Mission marked as completed" });
 });
-
-app.get("/missions/completed", (req, res) => {
-  res.json(auth.getCompletedMissions());
-});
-
-// ---------------- ARCHIVE ----------------
-// fetch all archived missions
-app.get("/missions/archive", (req, res) => {
-  res.json(auth.getArchivedMissions());
-});
-
-// archive (or restore) a mission
+app.get("/missions/completed", (req, res) => res.json(auth.getCompletedMissions()));
 app.put("/missions/:id/archive", (req, res) => {
-  const { id } = req.params;
-  auth.archiveMission(Number(id)); // you’ll need this to toggle archive/restore
-  res.json({ message: "Mission archive status updated" });
+  auth.archiveMission(Number(req.params.id));
+  res.json({ message: "Mission archived" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// ---------------- PLANETS ----------------
+app.get("/api/planets", async (req, res) => {
+  const planets = await getPlanets();
+  res.json(planets);
 });
+
+app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
