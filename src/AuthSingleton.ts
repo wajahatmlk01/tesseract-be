@@ -1,4 +1,3 @@
-// src/AuthSingleton.ts
 import jwt from "jsonwebtoken";
 
 interface Mission {
@@ -9,15 +8,7 @@ interface Mission {
   image?: string;
 }
 
-interface Planet {
-  id: number;
-  name: string;
-  starName: string;
-  discoveryYear: number;
-  description: string;
-}
-
-export default class AuthSingleton {
+class AuthSingleton {
   private static instance: AuthSingleton;
   private users: { [email: string]: { password: string; name: string } } = {};
 
@@ -34,12 +25,17 @@ export default class AuthSingleton {
     // Demo missions
     this.missions = [
       {
-        id: this.missionIdCounter++,
-        name: "IMAP Mission",
-        date: "2025-12-01T10:00",
-        description: "Studying solar wind and interstellar boundary.",
-        image: "/images/imap.png",
+        id: 1,
+        name: "Falcon 9 - Starlink 25",
+        date: "2025-09-25T18:00:00", // ISO format (upcoming)
+        description: "Delivering 60 Starlink satellites into orbit."
       },
+      {
+        id: 2,
+        name: "Falcon Heavy - Jupiter Probe",
+        date: "2025-10-10T14:00:00",
+        description: "Launching a deep space probe to Jupiter."
+      }
     ];
   }
 
@@ -54,34 +50,61 @@ export default class AuthSingleton {
   public validateUser(email: string, password: string): boolean {
     return this.users[email]?.password === password;
   }
-  public login(email: string, password: string): string | null {
-    if (this.validateUser(email, password)) {
-      return jwt.sign({ email }, "your_secret_key", { expiresIn: "1h" });
-    }
-    return null;
+
+  public getUserName(email: string): string | null {
+    return this.users[email]?.name ?? null;
   }
 
-  // Missions
-  public getMissions(): Mission[] { return this.missions; }
-  public addMission(name: string, date: string, description: string, image?: string): Mission {
-    const newMission: Mission = { id: this.missionIdCounter++, name, date, description, image };
-    this.missions.push(newMission);
-    return newMission;
+  // ---------------- MISSIONS ----------------
+  public getMissions(): Mission[] {
+    return this.missions;
   }
+
+  public addMission(name: string, date: string, description: string, image?: string): Mission {
+  const newMission: Mission = {
+    id: this.missions.length + this.completedMissions.length + this.archivedMissions.length + 1,
+    name,
+    date,
+    description,
+    image: image || ""
+  };
+  this.missions.push(newMission);
+  return newMission;
+  }
+
   public completeMission(id: number) {
-    const index = this.missions.findIndex((m) => m.id === id);
+    const index = this.missions.findIndex(m => m.id === id);
     if (index >= 0) {
       const [done] = this.missions.splice(index, 1);
       this.completedMissions.push(done);
     }
   }
-  public getCompletedMissions(): Mission[] { return this.completedMissions; }
+
+  public getCompletedMissions(): Mission[] {
+    return this.completedMissions;
+  }
+
   public archiveMission(id: number) {
-    const index = this.completedMissions.findIndex((m) => m.id === id);
+    const index = this.completedMissions.findIndex(m => m.id === id);
     if (index >= 0) {
       const [archived] = this.completedMissions.splice(index, 1);
       this.archivedMissions.push(archived);
     }
   }
-  public getArchivedMissions(): Mission[] { return this.archivedMissions; }
+
+  public getArchivedMissions(): Mission[] {
+    return this.archivedMissions;
+  }
+
+  // ---------------- JWT ----------------
+  private static SECRET = "your_secret_key";
+
+  public login(email: string, password: string): string | null {
+    if (this.validateUser(email, password)) {
+      return jwt.sign({ email }, AuthSingleton.SECRET, { expiresIn: "1h" });
+    }
+    return null;
+  }
 }
+
+export default AuthSingleton;
