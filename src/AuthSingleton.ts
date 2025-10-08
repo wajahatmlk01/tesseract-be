@@ -31,7 +31,7 @@ export default class AuthSingleton {
     this.users["waqas@gmail.com"] = { password: "123456", name: "Waqas" };
     this.users["wajahat@gmail.com"] = { password: "567890", name: "Wajahat" };
 
-    // Demo missions
+    // Demo ongoing missions (future-dated)
     this.missions = [
       {
         id: this.missionIdCounter++,
@@ -39,6 +39,66 @@ export default class AuthSingleton {
         date: "2025-12-01T10:00",
         description: "Studying solar wind and interstellar boundary.",
         image: "/images/imap.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Lunar Gateway",
+        date: "2030-04-18T09:00",
+        description: "A space station orbiting the Moon for deep-space exploration.",
+        image: "/images/lunar_gateway.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Europa Clipper",
+        date: "2031-06-22T14:30",
+        description: "Exploring Jupiter’s icy moon to investigate its habitability.",
+        image: "/images/europa_clipper.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Titan Dragonfly",
+        date: "2034-09-10T11:00",
+        description: "A drone mission to Saturn’s moon Titan to study its chemistry.",
+        image: "/images/titan_dragonfly.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Artemis IV",
+        date: "2032-03-15T08:00",
+        description: "A crewed mission continuing lunar exploration and construction.",
+        image: "/images/artemis_iv.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Mars Sample Return",
+        date: "2035-11-05T17:45",
+        description: "Returning Martian rock samples to Earth for detailed analysis.",
+        image: "/images/mars_sample_return.png",
+      },
+    ];
+
+    // Demo completed missions
+    this.completedMissions = [
+      {
+        id: this.missionIdCounter++,
+        name: "Voyager 1",
+        date: "1977-09-05T08:56",
+        description: "First human-made object to reach interstellar space.",
+        image: "/images/voyager1.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "Apollo 11",
+        date: "1969-07-16T13:32",
+        description: "The first successful crewed Moon landing mission.",
+        image: "/images/apollo11.png",
+      },
+      {
+        id: this.missionIdCounter++,
+        name: "James Webb Telescope",
+        date: "2022-12-25T12:20",
+        description: "Deep-space telescope observing distant galaxies and exoplanets.",
+        image: "/images/webb.png",
       },
     ];
   }
@@ -64,7 +124,10 @@ export default class AuthSingleton {
 
   // ---------------- MISSIONS ----------------
   public getMissions(): Mission[] {
-    return this.missions;
+    // Sort missions by date ascending, so newer/user missions appear first
+    return this.missions.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
   }
 
   public addMission(
@@ -81,6 +144,10 @@ export default class AuthSingleton {
       image,
     };
     this.missions.push(newMission);
+    // Keep missions sorted (user missions appear before far-future ones)
+    this.missions.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
     return newMission;
   }
 
