@@ -37,7 +37,7 @@ app.put("/missions/:id/archive", (req, res) => {
 });
 
 // ---------------- PLANETS ----------------
-app.get("/api/planets", async (req, res) => {
+app.get("/planets", async (req, res) => {
   const planets = await getPlanets();
   res.json(planets);
 });
